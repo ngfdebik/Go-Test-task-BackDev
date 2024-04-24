@@ -60,6 +60,9 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		fmt.Errorf("error")
 	}
+	byteRef := []byte(ref)
+	hash, _ := bcrypt.GenerateFromPassword(byteRef, 10)
+	ref = string(hash)
 
 	service := service.NewService(*service.NewStorage())
 	u, err := service.FindRefresh(context.Background(), ref)
