@@ -24,21 +24,9 @@ func GenerateHandler(w http.ResponseWriter, r *http.Request) {
 
 	usr := user.New(guid)
 	service := service.NewService(*service.NewStorage())
-	flag, u := service.GuidExist(context.Background(), usr.GUID)
+	flag, _ := service.GuidExist(context.Background(), usr.GUID)
 	if flag {
-		time, _ := strconv.ParseInt(u.AccessIssuedAt, 10, 64)
-		rsp, _, err := generator.GetTokens(*usr, time)
-		if err != nil {
-			fmt.Errorf("error: %v", err)
-		}
-
-		rsp.Refrersh = u.RefreshToken
-
-		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(rsp)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		http.Error(w, "error GUID exist", http.StatusInternalServerError)
 
 	} else {
 		rsp, u, err := generator.GetTokens(*usr, jwt.TimeFunc().Unix())
