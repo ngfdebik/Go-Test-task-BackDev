@@ -12,6 +12,7 @@ import (
 	"example.com/m/internal/user/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GenerateHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,9 @@ func GenerateHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Errorf("error: %v", err)
 		}
-
+		byteRef := []byte(u.RefreshToken)
+		hash, _ := bcrypt.GenerateFromPassword(byteRef, 10)
+		u.RefreshToken = string(hash)
 		_, err = service.Create(context.Background(), u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -85,6 +88,9 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Errorf("error: %v", err)
 		}
+		byteRef := []byte(u.RefreshToken)
+		hash, _ := bcrypt.GenerateFromPassword(byteRef, 10)
+		u.RefreshToken = string(hash)
 
 		err = service.Update(context.Background(), u)
 		if err != nil {
